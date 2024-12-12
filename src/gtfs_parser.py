@@ -21,6 +21,10 @@ FEED_URLS = {
 CACHE_DIR = "data/"
 CACHE_FILE = os.path.join(CACHE_DIR, "gtfs_cache.json")
 
+def get_station_name(stop_id, stops):
+    """Return the station name for a given stop ID."""
+    return stops.get(stop_id, {}).get("stop_name", "Unknown Stop")
+
 def load_csv_to_dict(file_path, key_field):
     """Load a CSV file into a dictionary keyed by the specified field."""
     data = {}
@@ -33,11 +37,23 @@ def load_csv_to_dict(file_path, key_field):
         print(f"Error: File not found: {file_path}")
     return data
 
+def load_csv_to_list(file_path):
+    """Load a CSV file into a list of dictionaries."""
+    data = []
+    try:
+        with open(file_path, mode="r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                data.append(row)
+    except FileNotFoundError:
+        print(f"Error: File not found: {file_path}")
+    return data
+
 def load_static_data():
     """Load stops, routes, and transfers from static GTFS data."""
     stops = load_csv_to_dict("data/stops.txt", "stop_id")
     routes = load_csv_to_dict("data/routes.txt", "route_id")
-    transfers = load_csv_to_dict("data/transfers.txt", "from_stop_id")
+    transfers = load_csv_to_list("data/transfers.txt")
     return stops, routes, transfers
 
 def fetch_gtfs_feed(line):
