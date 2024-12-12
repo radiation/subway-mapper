@@ -3,6 +3,7 @@ from google.transit import gtfs_realtime_pb2
 import datetime
 import json
 import os
+import csv
 
 # Base URLs for the MTA feeds
 BASE_URL = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds"
@@ -19,6 +20,25 @@ FEED_URLS = {
 
 CACHE_DIR = "data/"
 CACHE_FILE = os.path.join(CACHE_DIR, "gtfs_cache.json")
+
+def load_csv_to_dict(file_path, key_field):
+    """Load a CSV file into a dictionary keyed by the specified field."""
+    data = {}
+    try:
+        with open(file_path, mode="r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                data[row[key_field]] = row
+    except FileNotFoundError:
+        print(f"Error: File not found: {file_path}")
+    return data
+
+def load_static_data():
+    """Load stops, routes, and transfers from static GTFS data."""
+    stops = load_csv_to_dict("data/stops.txt", "stop_id")
+    routes = load_csv_to_dict("data/routes.txt", "route_id")
+    transfers = load_csv_to_dict("data/transfers.txt", "from_stop_id")
+    return stops, routes, transfers
 
 def fetch_gtfs_feed(line):
     """Fetch GTFS data for a specific subway line."""

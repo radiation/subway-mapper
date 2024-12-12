@@ -18,7 +18,7 @@ def load_csv_to_list(file_path):
             data.append(row)
     return data
 
-stops = load_csv_to_dict("stops.txt", "stop_id")
-shapes = load_csv_to_list("shapes.txt")  # For visualization
-routes = load_csv_to_dict("routes.txt", "route_id")
-transfers = load_csv_to_list("transfers.txt")
+stops = load_csv_to_dict("data/stops.txt", "stop_id")
+shapes = load_csv_to_list("data/shapes.txt")  # For visualization
+routes = load_csv_to_dict("data/routes.txt", "route_id")
+transfers = load_csv_to_list("data/transfers.txt")
