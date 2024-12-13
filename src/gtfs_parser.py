@@ -21,10 +21,6 @@ FEED_URLS = {
 CACHE_DIR = "data/"
 CACHE_FILE = os.path.join(CACHE_DIR, "gtfs_cache.json")
 
-def get_station_name(stop_id, stops):
-    """Return the station name for a given stop ID."""
-    return stops.get(stop_id, {}).get("stop_name", "Unknown Stop")
-
 def load_csv_to_dict(file_path, key_field):
     """Load a CSV file into a dictionary keyed by the specified field."""
     data = {}
@@ -50,9 +46,9 @@ def load_csv_to_list(file_path):
     return data
 
 def load_static_data():
-    """Load stops, routes, and transfers from static GTFS data."""
+    """Load stops, routes, transfers, and stop-to-route mapping."""
     stops = load_csv_to_dict("data/stops.txt", "stop_id")
-    routes = load_csv_to_dict("data/routes.txt", "route_id")
+    routes = create_stop_to_route_mapping()
     transfers = load_csv_to_list("data/transfers.txt")
     return stops, routes, transfers
 
@@ -106,6 +102,30 @@ def load_from_cache():
             return json.load(f)
     print("No cached data found.")
     return None
+
+def get_station_name(stop_id, stops):
+    """Return the station name for a given stop ID."""
+    return stops.get(stop_id, {}).get("stop_name", "Unknown Stop")
+
+def create_stop_to_route_mapping():
+    """Create a mapping of stop IDs to route IDs."""
+    trip_to_route = {}
+    stop_to_route = {}
+
+    # Load trips.txt to map trip_id to route_id
+    trips = load_csv_to_dict("data/trips.txt", "trip_id")
+    for trip_id, trip_data in trips.items():
+        trip_to_route[trip_id] = trip_data["route_id"]
+
+    # Load stop_times.txt to map stop_id to trip_id
+    stop_times = load_csv_to_list("data/stop_times.txt")
+    for entry in stop_times:
+        stop_id = entry["stop_id"]
+        trip_id = entry["trip_id"]
+        route_id = trip_to_route.get(trip_id, "Unknown Route")
+        stop_to_route[stop_id] = route_id
+
+    return stop_to_route
 
 if __name__ == "__main__":
     line = "ACE"

@@ -12,6 +12,7 @@ def add_transfers_to_graph(graph, transfers):
         if from_stop in graph:
             graph[from_stop].append((to_stop, transfer_time))
 
+
 def build_graph(parsed_data, transfers):
     """Constructs a graph from parsed GTFS data and adds transfers."""
     graph = defaultdict(dict)  # Use a dict of dicts to store minimum weights

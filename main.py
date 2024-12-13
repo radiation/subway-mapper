@@ -15,21 +15,34 @@ def display_edges(node, edges, stops):
         edge_name = get_station_name(edge, stops)
         print(f"  -> {edge} ({edge_name}): {travel_time} seconds")
 
-def display_route_with_times(path, times, stops):
-    """Pretty-print the route with station names and travel times."""
+def display_route_with_transfers(path, times, stops, routes):
+    """Pretty-print the route with station names, travel times, and transfers."""
     print("\n--- Fastest Route ---")
+    
     for i in range(len(path) - 1):
         start = path[i]
         end = path[i + 1]
         travel_time = times[i]
+
+        # Get the route for the current stop and next stop
+        start_route = routes.get(start, "Unknown Route")
+        end_route = routes.get(end, "Unknown Route")
+
+        # Print the current stop
+        print(f"{start} ({get_station_name(start, stops)}) - {start_route}")
+
+        # Check for transfer at the current stop
+        if start_route != end_route:
+            print(f"   | Transfer to {end_route} at {get_station_name(start, stops)}")
+
+        # Print the travel time to the next stop
         if travel_time is not None:
-            print(f"{start} ({get_station_name(start, stops)})")
             print(f"   | {travel_time} seconds")
         else:
-            print(f"{start} ({get_station_name(start, stops)})")
             print(f"   | Travel time unavailable to {end} ({get_station_name(end, stops)})")
+
     # Print the final stop
-    print(f"{path[-1]} ({get_station_name(path[-1], stops)})")
+    print(f"{path[-1]} ({get_station_name(path[-1], stops)}) - {routes.get(path[-1], 'Unknown Route')}")
 
 def get_travel_time(graph, start, end):
     """Retrieve the travel time between two stops."""
@@ -72,7 +85,7 @@ def main():
     if path:
         # Calculate travel times for each segment
         times = [get_travel_time(subway_graph, start, end) for start, end in zip(path[:-1], path[1:])]
-        display_route_with_times(path, times, stops)
+        display_route_with_transfers(path, times, stops, routes)
         print(f"Total travel time: {display_travel_time(distance)}")
     else:
         print(f"No route found from {start_stop} to {end_stop}.")
